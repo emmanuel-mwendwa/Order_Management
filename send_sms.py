@@ -1,7 +1,10 @@
+from datetime import datetime
 from flask import Flask, request
 import requests
 import africastalking
 import random
+import base64
+
 
 app = Flask(__name__)
 
@@ -22,6 +25,18 @@ def confirmation_message(order_number, food_items, amount):
         Amount: Ksh. {amount}\n
         Pay via: Buy Goods: 423424\n
         """
+
+
+def confirmation_reservation(order_number, people, amount):
+  order_number = random.randrange(0, 100000)
+  return f"""
+      Your reservation has been received.\n
+      Reservation number: {order_number},\n
+    for {people} people\n
+      Amount: Ksh. {amount}\n
+      Pay via: Buy Goods: 423424\n
+      """
+
 
 
 @app.route("/ussd", methods=['POST', 'GET'])
@@ -56,6 +71,30 @@ def ussd():
   elif text == '2*2':
     response = "CON Input Event's Range of people \n"
 
+  elif text.startswith('2*1*'):
+    # Extract the input after '2*1*'
+    user_input_range = text.split('*')[-1]
+
+    # Now you can use the user_input_range as a number and process it as needed
+    # For example, you can save it to a database or perform further actions
+
+    # Provide a response to the user
+    response = f"END {phone_number} Table Reservation for {user_input_range} people confirmed."
+    response_message = confirmation_reservation(phone_number, int(user_input_range),
+                                      (int(user_input_range) * 50))
+    response_to_sms(phone_number, response_message)
+  elif text.startswith('2*2*'):
+    # Extract the input after '2*1*'
+    user_input_range = text.split('*')[-1]
+
+    # Now you can use the user_input_range as a number and process it as needed
+    # For example, you can save it to a database or perform further actions
+
+    # Provide a response to the user
+    response = f"END {phone_number} Event Reservation for {user_input_range} people confirmed."
+    response_message = confirmation_reservation(phone_number, int(user_input_range), "50,000")
+    response_to_sms(phone_number, response_message)
+    
   elif text == '1*1':
     response = f"CON Choose Breakfast meal \n"
     response += "1.Tea & chapati \n"
